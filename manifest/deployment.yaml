@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: unixsocket
+  name: unixsocket
+spec:
+  containers:
+  - image: crystalline407/unixsocket
+    imagePullPolicy: Always
+    name: server
+    resources: {}
+    command: ["nc"]
+    args: ["-Ulk", "/run/socket/my.sock", "-vv"]
+    volumeMounts:
+    - mountPath: /run/socket
+      name: socket
+  - image: crystalline407/unixsocket
+    imagePullPolicy: Always
+    name: client
+    resources: {}
+    command: ["/bin/bash"]
+    args: ["-c", "--", "while true; do echo 'hello world' | socat stdio /run/socket/my.sock; sleep 5; done;"]
+    volumeMounts:
+    - mountPath: /run/socket
+      name: socket
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  volumes:
+  - name: socket
+    emptyDir: {}
+status: {}
